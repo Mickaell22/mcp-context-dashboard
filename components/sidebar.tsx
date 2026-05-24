@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { IconDashboard, IconBox, IconTerminal } from './icons'
 
 const NAV = [
@@ -12,6 +13,9 @@ const NAV = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
 
   return (
     <aside className="sidebar">
@@ -30,7 +34,7 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         <div className="nav-section-label">NAVIGATION</div>
         {NAV.map(item => {
-          const active = pathname === item.path
+          const active = mounted && pathname === item.path
           return (
             <Link
               key={item.path}
