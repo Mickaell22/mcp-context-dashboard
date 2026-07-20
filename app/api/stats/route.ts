@@ -3,7 +3,7 @@ import { query } from '@/lib/db'
 
 export async function GET() {
   try {
-    const [projects, queriesToday, totals, recent] = await Promise.all([
+    const [projects, queriesToday, totals, recent, blocked, recentBlocked] = await Promise.all([
       query('SELECT COUNT(*)::int AS count FROM projects'),
       query("SELECT COUNT(*)::int AS count FROM queries WHERE created_at >= CURRENT_DATE"),
       query(`
@@ -26,14 +26,23 @@ export async function GET() {
         ORDER BY q.created_at DESC
         LIMIT 8
       `),
+      query('SELECT COUNT(*)::int AS count FROM blocked_attempts'),
+      query(`
+        SELECT id, attempted_path, reason, created_at
+        FROM blocked_attempts
+        ORDER BY created_at DESC
+        LIMIT 5
+      `),
     ])
 
     return NextResponse.json({
-      projects:      projects[0]?.count ?? 0,
-      queriesToday:  queriesToday[0]?.count ?? 0,
-      totalTokens:   Number(totals[0]?.tokens ?? 0),
-      totalCost:     Number(totals[0]?.cost ?? 0),
-      recentQueries: recent,
+      projects:        projects[0]?.count ?? 0,
+      queriesToday:    queriesToday[0]?.count ?? 0,
+      totalTokens:     Number(totals[0]?.tokens ?? 0),
+      totalCost:       Number(totals[0]?.cost ?? 0),
+      recentQueries:   recent,
+      blockedAttempts: blocked[0]?.count ?? 0,
+      recentBlocked,
     })
   } catch (err) {
     console.error('[/api/stats]', err)

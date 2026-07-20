@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { IconFolder, IconBolt, IconChip, IconDollar, IconChevronRight } from '@/components/icons'
+import { IconFolder, IconBolt, IconChip, IconDollar, IconShield, IconChevronRight } from '@/components/icons'
 import ProjectBadge from '@/components/project-badge'
-import { fmtNumber, fmtCost, timeAgo } from '@/lib/format'
+import SkeletonRows from '@/components/skeleton'
+import { fmtNumber, fmtCost, timeAgo, parseQuery } from '@/lib/format'
 
 interface RecentQuery {
   id: number
@@ -16,12 +17,21 @@ interface RecentQuery {
   project_name: string | null
 }
 
+interface BlockedAttempt {
+  id: number
+  attempted_path: string
+  reason: string | null
+  created_at: string
+}
+
 interface Stats {
   projects: number
   queriesToday: number
   totalTokens: number
   totalCost: number
   recentQueries: RecentQuery[]
+  blockedAttempts: number
+  recentBlocked: BlockedAttempt[]
 }
 
 function StatCard({
@@ -52,7 +62,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch('/api/stats')
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error('DB error'); return r.json() })
       .then(setStats)
       .catch(() => setError(true))
   }, [])
@@ -85,6 +95,12 @@ export default function Dashboard() {
           sub="all time"
           Icon={IconDollar}
         />
+        <StatCard
+          label="Blocked"
+          value={stats?.blockedAttempts ?? '—'}
+          sub="whitelist denials"
+          Icon={IconShield}
+        />
       </div>
 
       <section className="panel">
@@ -108,18 +124,53 @@ export default function Dashboard() {
             {error && (
               <tr><td colSpan={5} className="empty">No se pudo conectar a la base de datos. Verifica DATABASE_URL en .env.local</td></tr>
             )}
-            {!stats && !error && (
-              <tr><td colSpan={5} className="empty mono small">Loading…</td></tr>
+            {!stats && !error && <SkeletonRows cols={5} rows={4} />}
+            {stats?.recentQueries.map(q => {
+              const parsed = parseQuery(q.query_text)
+              return (
+                <tr key={q.id}>
+                  <td><ProjectBadge name={q.project_name ?? '—'} /></td>
+                  <td className="cell-query">
+                    {parsed.type === 'audit' && (
+                      <span className="tag-audit mono">audit:{parsed.category}</span>
+                    )}
+                    <span className="query-text" title={parsed.text}>{parsed.text}</span>
+                  </td>
+                  <td className="num mono">{fmtNumber(Number(q.in_tokens) + Number(q.out_tokens))}</td>
+                  <td className="num mono">{fmtCost(Number(q.cost))}</td>
+                  <td className="num mono muted">{timeAgo(q.created_at)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <h2 className="panel-title">Blocked Attempts</h2>
+        </div>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Path</th>
+              <th style={{ width: 260 }}>Reason</th>
+              <th style={{ width: 110, textAlign: 'right' }}>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {error && (
+              <tr><td colSpan={3} className="empty">No se pudo conectar a la base de datos.</td></tr>
             )}
-            {stats?.recentQueries.map(q => (
-              <tr key={q.id}>
-                <td><ProjectBadge name={q.project_name ?? '—'} /></td>
-                <td className="cell-query">
-                  <span className="query-text" title={q.query_text}>{q.query_text}</span>
-                </td>
-                <td className="num mono">{fmtNumber(Number(q.in_tokens) + Number(q.out_tokens))}</td>
-                <td className="num mono">{fmtCost(Number(q.cost))}</td>
-                <td className="num mono muted">{timeAgo(q.created_at)}</td>
+            {!stats && !error && <SkeletonRows cols={3} rows={2} />}
+            {stats && stats.recentBlocked.length === 0 && (
+              <tr><td colSpan={3} className="empty">No blocked attempts. All whitelist checks passing.</td></tr>
+            )}
+            {stats?.recentBlocked.map(b => (
+              <tr key={b.id}>
+                <td className="mono small">{b.attempted_path}</td>
+                <td className="small muted">{b.reason ?? '—'}</td>
+                <td className="num mono muted">{timeAgo(b.created_at)}</td>
               </tr>
             ))}
           </tbody>

@@ -8,6 +8,7 @@ export async function GET(request: Request) {
   const page    = Math.max(1, parseInt(searchParams.get('page')    ?? '1'))
   const project = searchParams.get('project') ?? 'all'
   const search  = searchParams.get('search')  ?? ''
+  const type    = searchParams.get('type')    ?? 'all'
 
   try {
     const whereParams: unknown[] = []
@@ -21,6 +22,9 @@ export async function GET(request: Request) {
       whereParams.push(`%${search.trim()}%`)
       conditions.push(`q.query_text ILIKE $${whereParams.length}`)
     }
+    // Las auditorias se distinguen por el prefijo "[audit:" del server; SQL fijo, sin input del usuario.
+    if (type === 'audit') conditions.push(`q.query_text LIKE '[audit:%'`)
+    if (type === 'query') conditions.push(`q.query_text NOT LIKE '[audit:%'`)
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
     const mainParams = [...whereParams, PER_PAGE, (page - 1) * PER_PAGE]
@@ -38,6 +42,7 @@ export async function GET(request: Request) {
       query(`
         SELECT q.id,
                q.query_text,
+               q.response_text,
                q.deepseek_input_tokens  AS in_tokens,
                q.deepseek_output_tokens AS out_tokens,
                q.deepseek_cost_usd      AS cost,

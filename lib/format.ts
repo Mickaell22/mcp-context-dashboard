@@ -1,6 +1,8 @@
 export function timeAgo(date: Date | string): string {
   const d = date instanceof Date ? date : new Date(date)
-  const s = Math.floor((Date.now() - d.getTime()) / 1000)
+  // La BD guarda TIMESTAMP sin timezone (UTC); parseado como hora local puede
+  // quedar "en el futuro" y dar segundos negativos. Se clampa a 0.
+  const s = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000))
   if (s < 60) return `${s}s ago`
   if (s < 3600) return `${Math.floor(s / 60)}m ago`
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`
@@ -30,6 +32,14 @@ export function fmtDateTime(d: Date | string): string {
   const mn = String(date.getMinutes()).padStart(2, '0')
   const ss = String(date.getSeconds()).padStart(2, '0')
   return `${yy}-${mm}-${dd} ${hh}:${mn}:${ss}`
+}
+
+// El server loguea las auditorias en la misma tabla queries con prefijo
+// "[audit:<categoria>] ..." — el tipo se deriva del texto, no hay columna.
+export function parseQuery(raw: string): { type: 'query' | 'audit'; category: string | null; text: string } {
+  const m = raw.match(/^\[audit:([\w-]+)\]\s*/)
+  if (m) return { type: 'audit', category: m[1], text: raw.slice(m[0].length) }
+  return { type: 'query', category: null, text: raw }
 }
 
 const COLOR_NAMES = ['indigo', 'amber', 'emerald', 'rose', 'sky', 'violet', 'teal', 'slate'] as const

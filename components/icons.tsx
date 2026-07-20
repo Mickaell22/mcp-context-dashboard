@@ -87,6 +87,10 @@ export function IconChevronLeft(p: IconProps) {
   return <Icon {...p}><path d="M15 6l-6 6 6 6"/></Icon>
 }
 
+export function IconShield(p: IconProps) {
+  return <Icon {...p}><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z"/></Icon>
+}
+
 export function IconSearch(p: IconProps) {
   return (
     <Icon {...p}>

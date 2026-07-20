@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import { IconSearch, IconChevronRight, IconChevronLeft } from '@/components/icons'
 import ProjectBadge from '@/components/project-badge'
-import { fmtCost, fmtDateTime } from '@/lib/format'
+import SkeletonRows from '@/components/skeleton'
+import { fmtCost, fmtDateTime, parseQuery } from '@/lib/format'
 
 interface Query {
   id: number
   query_text: string
+  response_text: string | null
   in_tokens: number
   out_tokens: number
   cost: number
@@ -29,6 +31,7 @@ export default function Queries() {
   const [page, setPage]         = useState(1)
   const [project, setProject]   = useState('all')
   const [search, setSearch]     = useState('')
+  const [type, setType]         = useState('all')
   const [expanded, setExpanded] = useState<number | null>(null)
 
   useEffect(() => {
@@ -37,15 +40,17 @@ export default function Queries() {
       page: String(page),
       project,
       search,
+      type,
     })
     fetch(`/api/queries?${params}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error('DB error'); return r.json() })
       .then(setData)
       .catch(() => setError(true))
-  }, [page, project, search])
+  }, [page, project, search, type])
 
   function changeFilter(p: string) { setProject(p); setPage(1); setExpanded(null) }
   function changeSearch(s: string) { setSearch(s);  setPage(1); setExpanded(null) }
+  function changeType(t: string)   { setType(t);    setPage(1); setExpanded(null) }
 
   const total = data?.total ?? 0
 
@@ -69,6 +74,15 @@ export default function Queries() {
               onChange={e => changeSearch(e.target.value)}
             />
           </label>
+          <select
+            className="select mono small"
+            value={type}
+            onChange={e => changeType(e.target.value)}
+          >
+            <option value="all">All types</option>
+            <option value="query">Queries</option>
+            <option value="audit">Audits</option>
+          </select>
           <select
             className="select mono small"
             value={project}
@@ -99,19 +113,27 @@ export default function Queries() {
             {error && (
               <tr><td colSpan={7} className="empty">No se pudo conectar a la base de datos.</td></tr>
             )}
-            {!data && !error && (
-              <tr><td colSpan={7} className="empty mono small">Loading…</td></tr>
-            )}
+            {!data && !error && <SkeletonRows cols={7} rows={6} />}
             {data?.queries.length === 0 && (
               <tr><td colSpan={7} className="empty">No queries match this filter.</td></tr>
             )}
             {data?.queries.map(q => {
               const isOpen = expanded === q.id
+              const parsed = parseQuery(q.query_text)
               return (
                 <React.Fragment key={q.id}>
                   <tr
                     className={'row-clickable' + (isOpen ? ' row-open' : '')}
                     onClick={() => setExpanded(isOpen ? null : q.id)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        setExpanded(isOpen ? null : q.id)
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-expanded={isOpen}
                   >
                     <td>
                       <span className={'chev' + (isOpen ? ' chev--open' : '')}>
@@ -120,7 +142,10 @@ export default function Queries() {
                     </td>
                     <td><ProjectBadge name={q.project_name ?? '—'} /></td>
                     <td className="cell-query">
-                      <span className="query-text">{q.query_text}</span>
+                      {parsed.type === 'audit' && (
+                        <span className="tag-audit mono">audit:{parsed.category}</span>
+                      )}
+                      <span className="query-text">{parsed.text}</span>
                     </td>
                     <td className="num mono">{Number(q.in_tokens).toLocaleString('en-US')}</td>
                     <td className="num mono">{Number(q.out_tokens).toLocaleString('en-US')}</td>
@@ -133,12 +158,18 @@ export default function Queries() {
                       <td colSpan={6}>
                         <div className="detail-block">
                           <div className="detail-label">QUERY · #{q.id}</div>
-                          <pre className="mono detail-pre">{q.query_text}</pre>
+                          <pre className="mono detail-pre">{parsed.text}</pre>
+                          {q.response_text && (
+                            <>
+                              <div className="detail-label" style={{ marginTop: 12 }}>RESPONSE</div>
+                              <pre className="mono detail-pre detail-pre--response">{q.response_text}</pre>
+                            </>
+                          )}
                           <div className="detail-meta">
+                            <span><span className="muted">type:</span>{' '}<span className="mono">{parsed.type === 'audit' ? `audit:${parsed.category}` : 'query'}</span></span>
                             <span><span className="muted">in:</span>{' '}<span className="mono">{Number(q.in_tokens).toLocaleString('en-US')} tok</span></span>
                             <span><span className="muted">out:</span>{' '}<span className="mono">{Number(q.out_tokens).toLocaleString('en-US')} tok</span></span>
                             <span><span className="muted">cost:</span>{' '}<span className="mono">{fmtCost(Number(q.cost))}</span></span>
-                            <span><span className="muted">model:</span>{' '}<span className="mono">deepseek-chat</span></span>
                             <span><span className="muted">date:</span>{' '}<span className="mono">{fmtDateTime(q.created_at)}</span></span>
                           </div>
                         </div>

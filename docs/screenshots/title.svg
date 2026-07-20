@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="130" viewBox="0 0 820 130" fill="none" role="img" aria-label="mcp-dashboard">
+  <defs>
+    <linearGradient id="shimmer" x1="0" y1="0" x2="320" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="reflect">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="0.5" stop-color="#a5b4fc"/>
+      <stop offset="1" stop-color="#10b981"/>
+      <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="320 0" dur="3.2s" repeatCount="indefinite"/>
+    </linearGradient>
+  </defs>
+
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -5; 0 0" dur="3.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" keyTimes="0; 0.5; 1"/>
+    <text x="207" y="82" font-family="'DejaVu Sans Mono','JetBrains Mono','Consolas',monospace" font-size="52" font-weight="bold" fill="url(#shimmer)">mcp-dashboard</text>
+  </g>
+</svg>
