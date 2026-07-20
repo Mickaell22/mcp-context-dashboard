@@ -540,6 +540,11 @@ a.src-tag:hover { color: var(--accent-fg); border-color: var(--border-strong); }
   color: var(--fg-muted);
 }
 
+.status-dot--err {
+  background: #f43f5e;
+  box-shadow: 0 0 6px rgba(244, 63, 94, 0.5);
+}
+
 /* Loading skeletons */
 
 .skel {

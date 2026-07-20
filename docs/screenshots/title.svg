@@ -1,15 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="820" height="130" viewBox="0 0 820 130" fill="none" role="img" aria-label="mcp-dashboard">
   <defs>
-    <linearGradient id="shimmer" x1="0" y1="0" x2="320" y2="0" gradientUnits="userSpaceOnUse" spreadMethod="reflect">
-      <stop offset="0" stop-color="#6366f1"/>
-      <stop offset="0.5" stop-color="#a5b4fc"/>
-      <stop offset="1" stop-color="#10b981"/>
-      <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="320 0" dur="3.2s" repeatCount="indefinite"/>
-    </linearGradient>
+    <clipPath id="type">
+      <rect x="170" y="16" height="98" width="0">
+        <animate attributeName="width" calcMode="discrete" dur="6s" repeatCount="indefinite"
+          values="0;45;77;108;139;170;202;233;264;295;327;358;389;420;452;483;483"
+          keyTimes="0;0.035;0.07;0.105;0.14;0.175;0.21;0.245;0.28;0.315;0.35;0.385;0.42;0.455;0.49;0.525;1"/>
+      </rect>
+    </clipPath>
   </defs>
 
-  <g>
-    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -5; 0 0" dur="3.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" keyTimes="0; 0.5; 1"/>
-    <text x="207" y="82" font-family="'DejaVu Sans Mono','JetBrains Mono','Consolas',monospace" font-size="52" font-weight="bold" fill="url(#shimmer)">mcp-dashboard</text>
+  <g clip-path="url(#type)">
+    <text x="176" y="82" font-family="'DejaVu Sans Mono','JetBrains Mono','Consolas',monospace" font-size="52" font-weight="bold"><tspan fill="#10b981">$ </tspan><tspan fill="#a5b4fc">mcp-dashboard</tspan></text>
   </g>
+
+  <!-- cursor de bloque: sigue el tipeo y parpadea -->
+  <rect y="38" width="26" height="52" fill="#6366f1">
+    <animate attributeName="x" calcMode="discrete" dur="6s" repeatCount="indefinite"
+      values="176;207;239;270;301;332;364;395;426;457;489;520;551;582;614;645;645"
+      keyTimes="0;0.035;0.07;0.105;0.14;0.175;0.21;0.245;0.28;0.315;0.35;0.385;0.42;0.455;0.49;0.525;1"/>
+    <animate attributeName="opacity" calcMode="discrete" values="1;0" keyTimes="0;0.5" dur="1.06s" repeatCount="indefinite"/>
+  </rect>
 </svg>

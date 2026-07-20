@@ -113,7 +113,8 @@ mcp-dashboard/
 │   └── api/
 │       ├── stats/route.ts
 │       ├── projects/route.ts
-│       └── queries/route.ts
+│       ├── queries/route.ts
+│       └── health/route.ts    # SELECT 1 — estado de la BD para el sidebar
 ├── components/
 │   ├── sidebar.tsx         # Nav lateral
 │   ├── icons.tsx           # SVG icons inline

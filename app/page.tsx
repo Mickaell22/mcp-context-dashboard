@@ -72,11 +72,11 @@ export default function Dashboard() {
       <div className="page-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
-          <div className="page-subtitle">Local MCP server · running on :3284</div>
+          <div className="page-subtitle">MCP Context Server · actividad y costos</div>
         </div>
         <div className="server-status">
-          <span className="status-dot status-dot--ok" />
-          <span className="mono small muted">online</span>
+          <span className={'status-dot' + (stats ? ' status-dot--ok' : error ? ' status-dot--err' : '')} />
+          <span className="mono small muted">{stats ? 'db online' : error ? 'db offline' : '...'}</span>
         </div>
       </div>
 

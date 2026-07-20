@@ -14,8 +14,14 @@ const NAV = [
 export default function Sidebar() {
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
+  const [db, setDb] = useState<'loading' | 'online' | 'offline'>('loading')
 
-  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => {
+    setMounted(true)
+    fetch('/api/health')
+      .then(r => setDb(r.ok ? 'online' : 'offline'))
+      .catch(() => setDb('offline'))
+  }, [])
 
   return (
     <aside className="sidebar">
@@ -27,7 +33,7 @@ export default function Sidebar() {
         </div>
         <div>
           <div className="brand-title">MCP Context</div>
-          <div className="brand-sub mono">Server · v0.4.2</div>
+          <div className="brand-sub mono">dashboard</div>
         </div>
       </div>
 
@@ -52,13 +58,13 @@ export default function Sidebar() {
       <div className="sidebar-foot">
         <div className="conn-card">
           <div className="conn-row">
-            <span className="status-dot status-dot--ok" />
-            <span className="mono small">localhost:3284</span>
+            <span className={'status-dot' + (db === 'online' ? ' status-dot--ok' : db === 'offline' ? ' status-dot--err' : '')} />
+            <span className="mono small">PostgreSQL</span>
           </div>
           <div className="conn-meta mono small muted">
-            <span>MCP Server</span>
+            <span>database</span>
             <span>·</span>
-            <span>online</span>
+            <span>{db === 'loading' ? '...' : db}</span>
           </div>
         </div>
       </div>
