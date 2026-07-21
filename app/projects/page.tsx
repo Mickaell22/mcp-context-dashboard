@@ -8,6 +8,9 @@ interface Project {
   id: number
   name: string
   repo_url: string | null
+  // Ruta local por dispositivo: { device_id: path }. Varios equipos comparten
+  // la misma Postgres con el repo en rutas distintas.
+  device_paths: Record<string, string> | null
   last_indexed_at: string | null
   file_count: number
   session_count: number
@@ -100,6 +103,7 @@ export default function Projects() {
           <thead>
             <tr>
               <SortTh k="name"          active={sortKey === 'name'}          dir={sortDir} onSort={setSort}>Name</SortTh>
+              <th>Devices</th>
               <SortTh k="file_count"    active={sortKey === 'file_count'}    dir={sortDir} onSort={setSort} align="right">Files</SortTh>
               <SortTh k="last_indexed_at" active={sortKey === 'last_indexed_at'} dir={sortDir} onSort={setSort} align="right">Last Indexed</SortTh>
               <SortTh k="session_count" active={sortKey === 'session_count'} dir={sortDir} onSort={setSort} align="right">Sessions</SortTh>
@@ -110,8 +114,8 @@ export default function Projects() {
             </tr>
           </thead>
           <tbody>
-            {error && <tr><td colSpan={8} className="empty">No se pudo conectar a la base de datos.</td></tr>}
-            {!projects.length && !error && <SkeletonRows cols={8} rows={5} />}
+            {error && <tr><td colSpan={9} className="empty">No se pudo conectar a la base de datos.</td></tr>}
+            {!projects.length && !error && <SkeletonRows cols={9} rows={5} />}
             {sorted.map(p => {
               const color = getProjectColor(p.name)
               return (
@@ -126,6 +130,17 @@ export default function Projects() {
                         <span className="src-tag mono">local</span>
                       )}
                     </div>
+                  </td>
+                  <td>
+                    {p.device_paths && Object.keys(p.device_paths).length > 0 ? (
+                      <div className="device-tags">
+                        {Object.entries(p.device_paths).map(([dev, path]) => (
+                          <span key={dev} className="src-tag mono" title={path}>{dev}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="muted mono" title="Sin ruta local registrada en ningún equipo">—</span>
+                    )}
                   </td>
                   <td className="num mono">{p.file_count.toLocaleString('en-US')}</td>
                   <td className="num mono muted">

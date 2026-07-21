@@ -44,7 +44,7 @@
 | Pagina | Descripcion |
 |---|---|
 | `/` Dashboard | 5 stat cards (proyectos, queries hoy, tokens totales, costo total, intentos bloqueados) + ultimas 8 queries + panel de intentos bloqueados por whitelist |
-| `/projects` Projects | Tabla de proyectos con origen (local/github), archivos indexados, ultimo indexado, sesiones, queries, costo y ultima actividad. Ordenable por cualquier columna. |
+| `/projects` Projects | Tabla de proyectos con origen (local/github), dispositivos donde tiene ruta local registrada (badges de `device_paths`, con la ruta en el tooltip), archivos indexados, ultimo indexado, sesiones, queries, costo y ultima actividad. Ordenable por cualquier columna. |
 | `/queries` Queries | Historial paginado (20/pag) con filtro por tipo (query/audit), filtro por proyecto y busqueda por texto. Click en fila para expandir la query completa con su respuesta y metadata. Las auditorias del server se marcan con tag `audit:<categoria>`. |
 
 <div align="center">

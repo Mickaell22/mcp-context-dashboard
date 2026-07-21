@@ -534,6 +534,14 @@ button { font-family: inherit; }
 }
 a.src-tag:hover { color: var(--accent-fg); border-color: var(--border-strong); }
 
+/* Badges de dispositivos (rutas por equipo) en la tabla de proyectos. */
+.device-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.device-tags .src-tag { cursor: default; }
+
 .detail-pre--response {
   max-height: 320px;
   overflow-y: auto;

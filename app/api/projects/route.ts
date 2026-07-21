@@ -9,6 +9,7 @@ export async function GET() {
         p.id,
         p.name,
         p.repo_url,
+        p.device_paths,
         p.last_indexed_at,
         COALESCE(f.file_count, 0)     AS file_count,
         COALESCE(s.session_count, 0)  AS session_count,
