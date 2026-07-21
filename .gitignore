@@ -3,3 +3,6 @@ node_modules/
 .env.local
 *.env
 CLAUDE.md
+
+# Cache de build de TypeScript
+*.tsbuildinfo
